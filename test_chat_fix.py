@@ -48,10 +48,7 @@ def test_chat_fix():
     print("3. Click 'Chat' button on accepted appointments")
     print("4. Or go directly to Messages page")
     
-    print(f"\n🔑 Login Credentials:")
-    print("Doctor: dr.smith@healthcare.com / doctor123")
-    print("Patient: patient1@healthcare.com / patient123")
-    print("Server: http://127.0.0.1:8000/")
+  
 
 if __name__ == "__main__":
     test_chat_fix()
