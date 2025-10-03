@@ -1,0 +1,303 @@
+{% extends 'frontend/base.html' %}
+
+{% block title %}{{ title }} | HealthCare+{% endblock %}
+
+{% block content %}
+<div class="px-4 py-8">
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-accent to-primary text-white rounded-xl p-6 mb-8">
+        <h1 class="text-3xl font-bold mb-2">
+            <i class="fas fa-calendar-check mr-3"></i>
+            {{ title }}
+        </h1>
+        <p class="text-yellow-100">
+            {% if user.role == 'patient' %}
+                Schedule and manage your healthcare appointments
+            {% elif user.role == 'doctor' %}
+                View and manage patient appointments
+            {% else %}
+                System-wide appointment overview
+            {% endif %}
+        </p>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <div class="flex items-center">
+                <div class="bg-blue-500 text-white p-3 rounded-lg mr-4">
+                    <i class="fas fa-calendar-check text-xl"></i>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-bold text-gray-800">{{ appointments|length }}</h3>
+                    <p class="text-gray-600 text-sm">Total Appointments</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <div class="flex items-center">
+                <div class="bg-yellow-500 text-white p-3 rounded-lg mr-4">
+                    <i class="fas fa-clock text-xl"></i>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-bold text-gray-800">
+                        {% for apt in appointments %}{% if apt.status == 'pending' %}{% if forloop.first %}1{% else %}{{ forloop.counter }}{% endif %}{% endif %}{% empty %}0{% endfor %}
+                    </h3>
+                    <p class="text-gray-600 text-sm">Pending</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <div class="flex items-center">
+                <div class="bg-green-500 text-white p-3 rounded-lg mr-4">
+                    <i class="fas fa-check-circle text-xl"></i>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-bold text-gray-800">
+                        {% for apt in appointments %}{% if apt.status == 'accepted' %}{% if forloop.first %}1{% else %}{{ forloop.counter }}{% endif %}{% endif %}{% empty %}0{% endfor %}
+                    </h3>
+                    <p class="text-gray-600 text-sm">Accepted</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <div class="flex items-center">
+                <div class="bg-purple-500 text-white p-3 rounded-lg mr-4">
+                    <i class="fas fa-check-double text-xl"></i>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-bold text-gray-800">
+                        {% for apt in appointments %}{% if apt.status == 'completed' %}{% if forloop.first %}1{% else %}{{ forloop.counter }}{% endif %}{% endif %}{% empty %}0{% endfor %}
+                    </h3>
+                    <p class="text-gray-600 text-sm">Completed</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Actions -->
+    {% if user.role == 'patient' and can_book %}
+        <div class="mb-6">
+            <a href="{% url 'frontend:book_appointment' %}" 
+               class="bg-primary text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors inline-flex items-center">
+                <i class="fas fa-plus mr-2"></i>Book New Appointment
+            </a>
+        </div>
+    {% endif %}
+
+    <!-- Appointments List -->
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+        <div class="p-6 border-b border-gray-200">
+            <h2 class="text-xl font-bold text-gray-800">
+                {% if user.role == 'patient' %}
+                    Your Appointments
+                {% elif user.role == 'doctor' %}
+                    Patient Appointments
+                {% else %}
+                    All Appointments
+                {% endif %}
+            </h2>
+        </div>
+        
+        {% if appointments %}
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            {% if user.role == 'patient' %}
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Doctor</th>
+                            {% elif user.role == 'doctor' %}
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Patient</th>
+                            {% else %}
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Patient</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Doctor</th>
+                            {% endif %}
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date & Time</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reason</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for appointment in appointments %}
+                            <tr class="hover:bg-gray-50">
+                                {% if user.role == 'patient' %}
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center">
+                                                <i class="fas fa-user-md"></i>
+                                            </div>
+                                            <div class="ml-4">
+                                                <div class="text-sm font-medium text-gray-900">
+                                                    Dr. {{ appointment.doctor.user.get_full_name }}
+                                                </div>
+                                                <div class="text-sm text-gray-500">
+                                                    {{ appointment.doctor.specialization|title }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                {% elif user.role == 'doctor' %}
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="w-10 h-10 bg-secondary text-white rounded-full flex items-center justify-center">
+                                                <i class="fas fa-user"></i>
+                                            </div>
+                                            <div class="ml-4">
+                                                <div class="text-sm font-medium text-gray-900">
+                                                    {{ appointment.patient.user.get_full_name }}
+                                                </div>
+                                                <div class="text-sm text-gray-500">
+                                                    Patient ID: #{{ appointment.patient.id }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                {% else %}
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm font-medium text-gray-900">
+                                            {{ appointment.patient.user.get_full_name }}
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm font-medium text-gray-900">
+                                            Dr. {{ appointment.doctor.user.get_full_name }}
+                                        </div>
+                                    </td>
+                                {% endif %}
+                                
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900">
+                                        {{ appointment.appointment_date|date:"M d, Y" }}
+                                    </div>
+                                    <div class="text-sm text-gray-500">
+                                        {{ appointment.appointment_date|date:"H:i" }}
+                                    </div>
+                                </td>
+                                
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-800 rounded-full">
+                                        {{ appointment.appointment_type|title }}
+                                    </span>
+                                </td>
+                                
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    {% if appointment.status == 'pending' %}
+                                        <span class="px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 rounded-full">
+                                            <i class="fas fa-clock mr-1"></i>Pending
+                                        </span>
+                                    {% elif appointment.status == 'accepted' %}
+                                        <span class="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">
+                                            <i class="fas fa-check mr-1"></i>Accepted
+                                        </span>
+                                    {% elif appointment.status == 'rejected' %}
+                                        <span class="px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded-full">
+                                            <i class="fas fa-times mr-1"></i>Rejected
+                                        </span>
+                                    {% elif appointment.status == 'completed' %}
+                                        <span class="px-2 py-1 text-xs font-medium bg-purple-100 text-purple-800 rounded-full">
+                                            <i class="fas fa-check-double mr-1"></i>Completed
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                
+                                <td class="px-6 py-4">
+                                    <div class="text-sm text-gray-900 max-w-xs truncate">
+                                        {{ appointment.reason_for_visit|default:"No reason provided" }}
+                                    </div>
+                                </td>
+                                
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <div class="flex space-x-2">
+                                        <!-- Chat button for accepted appointments -->
+                                        {% if appointment.status == 'accepted' %}
+                                            <a href="{% url 'frontend:chat' %}?partner={% if user.role == 'patient' %}{{ appointment.doctor.user.id }}{% else %}{{ appointment.patient.user.id }}{% endif %}&appointment={{ appointment.id }}" 
+                                               class="bg-blue-600 text-white px-3 py-1 rounded text-xs hover:bg-blue-700 transition-colors">
+                                                <i class="fas fa-comments mr-1"></i>Chat
+                                            </a>
+                                        {% endif %}
+                                        
+                                        <!-- Doctor actions for pending appointments -->
+                                        {% if user.role == 'doctor' and appointment.status == 'pending' %}
+                                            <form method="POST" action="{% url 'frontend:approve_appointment' appointment.id %}" class="inline">
+                                                {% csrf_token %}
+                                                <button type="submit" class="bg-green-600 text-white px-3 py-1 rounded text-xs hover:bg-green-700 transition-colors">
+                                                    <i class="fas fa-check mr-1"></i>Accept
+                                                </button>
+                                            </form>
+                                            <form method="POST" action="{% url 'frontend:reject_appointment' appointment.id %}" class="inline">
+                                                {% csrf_token %}
+                                                <button type="submit" class="bg-red-600 text-white px-3 py-1 rounded text-xs hover:bg-red-700 transition-colors">
+                                                    <i class="fas fa-times mr-1"></i>Reject
+                                                </button>
+                                            </form>
+                                        {% endif %}
+                                        
+                                        <!-- Mark as completed for accepted appointments -->
+                                        {% if user.role == 'doctor' and appointment.status == 'accepted' %}
+                                            <form method="POST" action="{% url 'frontend:complete_appointment' appointment.id %}" class="inline">
+                                                {% csrf_token %}
+                                                <button type="submit" class="bg-purple-600 text-white px-3 py-1 rounded text-xs hover:bg-purple-700 transition-colors">
+                                                    <i class="fas fa-check-double mr-1"></i>Complete
+                                                </button>
+                                            </form>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="p-8 text-center">
+                <i class="fas fa-calendar-times text-6xl text-gray-300 mb-4"></i>
+                <h3 class="text-xl font-semibold text-gray-800 mb-2">No Appointments Found</h3>
+                <p class="text-gray-600 mb-4">
+                    {% if user.role == 'patient' %}
+                        You haven't booked any appointments yet.
+                    {% elif user.role == 'doctor' %}
+                        No patients have booked appointments with you yet.
+                    {% else %}
+                        No appointments in the system yet.
+                    {% endif %}
+                </p>
+                {% if user.role == 'patient' %}
+                    <a href="{% url 'frontend:book_appointment' %}" 
+                       class="bg-primary text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors inline-flex items-center">
+                        <i class="fas fa-plus mr-2"></i>Book Your First Appointment
+                    </a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+    
+    <!-- Instructions -->
+    <div class="mt-8 bg-blue-50 border border-blue-200 rounded-xl p-6">
+        <h3 class="text-lg font-semibold text-blue-800 mb-2">
+            <i class="fas fa-info-circle mr-2"></i>How It Works
+        </h3>
+        <div class="text-blue-700">
+            {% if user.role == 'patient' %}
+                <ol class="list-decimal list-inside space-y-1">
+                    <li>Book an appointment with your preferred doctor</li>
+                    <li>Wait for the doctor to accept your appointment</li>
+                    <li>Once accepted, you can chat with the doctor</li>
+                    <li>Attend your appointment at the scheduled time</li>
+                </ol>
+            {% elif user.role == 'doctor' %}
+                <ol class="list-decimal list-inside space-y-1">
+                    <li>Review incoming appointment requests</li>
+                    <li>Accept or reject requests based on your availability</li>
+                    <li>Chat with patients for accepted appointments</li>
+                    <li>Mark appointments as completed after consultation</li>
+                </ol>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

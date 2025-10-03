@@ -1,0 +1,391 @@
+{% extends 'frontend/base.html' %}
+
+{% block title %}{{ title }} | HealthCare+{% endblock %}
+
+{% block content %}
+<!-- Auto-refresh for real-time updates -->
+<meta http-equiv="refresh" content="30">
+
+<div class="px-4 py-8">
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-primary to-secondary text-white rounded-xl p-6 mb-8">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-3xl font-bold mb-2">Welcome back, {{ user.first_name }}!</h1>
+                <p class="text-green-100">{{ title }} - Manage your healthcare activities</p>
+            </div>
+            <div class="text-right">
+                <div class="bg-white bg-opacity-20 rounded-lg p-4">
+                    <div class="text-2xl font-bold">{{ user.role|title }}</div>
+                    <div class="text-sm text-green-100">Account Type</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {% if user.role == 'patient' %}
+            <a href="{% url 'frontend:appointments' %}" class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow">
+                <div class="flex items-center">
+                    <div class="bg-primary text-white p-3 rounded-lg mr-4">
+                        <i class="fas fa-calendar-plus text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-800">Book Appointment</h3>
+                        <p class="text-gray-600 text-sm">Schedule with doctors</p>
+                    </div>
+                </div>
+            </a>
+            
+            <a href="{% url 'frontend:doctors' %}" class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow">
+                <div class="flex items-center">
+                    <div class="bg-secondary text-white p-3 rounded-lg mr-4">
+                        <i class="fas fa-user-md text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-800">Find Doctors</h3>
+                        <p class="text-gray-600 text-sm">Browse specialists</p>
+                    </div>
+                </div>
+            </a>
+            
+            <a href="{% url 'frontend:chat' %}" class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow">
+                <div class="flex items-center">
+                    <div class="bg-accent text-white p-3 rounded-lg mr-4">
+                        <i class="fas fa-comments text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-800">Messages</h3>
+                        <p class="text-gray-600 text-sm">Chat with doctors</p>
+                    </div>
+                </div>
+            </a>
+            
+            <a href="{% url 'frontend:profile' %}" class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow">
+                <div class="flex items-center">
+                    <div class="bg-purple-600 text-white p-3 rounded-lg mr-4">
+                        <i class="fas fa-user-edit text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-800">My Profile</h3>
+                        <p class="text-gray-600 text-sm">Update information</p>
+                    </div>
+                </div>
+            </a>
+        {% elif user.role == 'doctor' %}
+            <a href="{% url 'frontend:patients' %}" class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow">
+                <div class="flex items-center">
+                    <div class="bg-primary text-white p-3 rounded-lg mr-4">
+                        <i class="fas fa-users text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-800">My Patients</h3>
+                        <p class="text-gray-600 text-sm">Manage patient care</p>
+                    </div>
+                </div>
+            </a>
+            
+            <a href="{% url 'frontend:appointments' %}" class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow">
+                <div class="flex items-center">
+                    <div class="bg-secondary text-white p-3 rounded-lg mr-4">
+                        <i class="fas fa-calendar-check text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-800">Appointments</h3>
+                        <p class="text-gray-600 text-sm">View & manage</p>
+                    </div>
+                </div>
+            </a>
+            
+            <a href="{% url 'frontend:chat' %}" class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow">
+                <div class="flex items-center">
+                    <div class="bg-accent text-white p-3 rounded-lg mr-4">
+                        <i class="fas fa-comments text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-800">Patient Messages</h3>
+                        <p class="text-gray-600 text-sm">Communicate securely</p>
+                    </div>
+                </div>
+            </a>
+            
+            <a href="{% url 'frontend:profile' %}" class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow">
+                <div class="flex items-center">
+                    <div class="bg-purple-600 text-white p-3 rounded-lg mr-4">
+                        <i class="fas fa-user-edit text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-800">My Profile</h3>
+                        <p class="text-gray-600 text-sm">Update information</p>
+                    </div>
+                </div>
+            </a>
+        {% elif user.role == 'admin' %}
+            <a href="/admin/" class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow">
+                <div class="flex items-center">
+                    <div class="bg-danger text-white p-3 rounded-lg mr-4">
+                        <i class="fas fa-cogs text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-800">Admin Panel</h3>
+                        <p class="text-gray-600 text-sm">System management</p>
+                    </div>
+                </div>
+            </a>
+            
+            <a href="{% url 'frontend:patients' %}" class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow">
+                <div class="flex items-center">
+                    <div class="bg-primary text-white p-3 rounded-lg mr-4">
+                        <i class="fas fa-users text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-800">All Users</h3>
+                        <p class="text-gray-600 text-sm">User management</p>
+                    </div>
+                </div>
+            </a>
+            
+            <a href="{% url 'frontend:appointments' %}" class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow">
+                <div class="flex items-center">
+                    <div class="bg-secondary text-white p-3 rounded-lg mr-4">
+                        <i class="fas fa-calendar text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-800">All Appointments</h3>
+                        <p class="text-gray-600 text-sm">System overview</p>
+                    </div>
+                </div>
+            </a>
+            
+            <a href="#" class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow">
+                <div class="flex items-center">
+                    <div class="bg-accent text-white p-3 rounded-lg mr-4">
+                        <i class="fas fa-chart-bar text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-800">Analytics</h3>
+                        <p class="text-gray-600 text-sm">System reports</p>
+                    </div>
+                </div>
+            </a>
+        {% else %}
+            <a href="{% url 'frontend:doctors' %}" class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow">
+                <div class="flex items-center">
+                    <div class="bg-primary text-white p-3 rounded-lg mr-4">
+                        <i class="fas fa-user-md text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-800">Browse Doctors</h3>
+                        <p class="text-gray-600 text-sm">Find specialists</p>
+                    </div>
+                </div>
+            </a>
+            
+            <a href="#" class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow">
+                <div class="flex items-center">
+                    <div class="bg-secondary text-white p-3 rounded-lg mr-4">
+                        <i class="fas fa-info-circle text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-800">Health Info</h3>
+                        <p class="text-gray-600 text-sm">Educational content</p>
+                    </div>
+                </div>
+            </a>
+            
+            <a href="#" class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow">
+                <div class="flex items-center">
+                    <div class="bg-accent text-white p-3 rounded-lg mr-4">
+                        <i class="fas fa-hospital text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-800">Services</h3>
+                        <p class="text-gray-600 text-sm">Available treatments</p>
+                    </div>
+                </div>
+            </a>
+            
+            <a href="{% url 'frontend:register' %}" class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow">
+                <div class="flex items-center">
+                    <div class="bg-purple-600 text-white p-3 rounded-lg mr-4">
+                        <i class="fas fa-user-plus text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-800">Upgrade Account</h3>
+                        <p class="text-gray-600 text-sm">Become a patient</p>
+                    </div>
+                </div>
+            </a>
+        {% endif %}
+    </div>
+
+    <!-- Real-Time Messages Section -->
+    {% if user.role == 'patient' and recent_messages %}
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-bold text-gray-800">
+                    <i class="fas fa-comments text-blue-600 mr-2"></i>
+                    Recent Messages from Doctors
+                    {% if recent_messages %}
+                        <span class="ml-2 px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
+                            {{ recent_messages|length }} new
+                        </span>
+                    {% endif %}
+                </h2>
+                <a href="{% url 'frontend:chat' %}" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                    View All Messages <i class="fas fa-arrow-right ml-1"></i>
+                </a>
+            </div>
+            
+            <div class="space-y-3">
+                {% for message in recent_messages %}
+                    <div class="flex items-start p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
+                        <div class="w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center mr-3">
+                            <i class="fas fa-user-md text-sm"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center justify-between">
+                                <p class="text-sm font-medium text-gray-900">
+                                    Dr. {{ message.sender.get_full_name }}
+                                </p>
+                                <p class="text-xs text-gray-500">
+                                    {{ message.timestamp|timesince }} ago
+                                </p>
+                            </div>
+                            <p class="text-sm text-gray-700 mt-1 truncate">
+                                {{ message.content }}
+                            </p>
+                            <a href="{% url 'frontend:chat' %}?partner={{ message.sender.id }}&appointment={{ message.chat_room.appointment.id }}" 
+                               class="text-xs text-blue-600 hover:text-blue-800 mt-2 inline-block">
+                                Reply to Dr. {{ message.sender.get_full_name }} <i class="fas fa-reply ml-1"></i>
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% elif user.role == 'doctor' and recent_messages %}
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-bold text-gray-800">
+                    <i class="fas fa-comments text-green-600 mr-2"></i>
+                    Recent Messages from Patients
+                    {% if recent_messages %}
+                        <span class="ml-2 px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">
+                            {{ recent_messages|length }} new
+                        </span>
+                    {% endif %}
+                </h2>
+                <a href="{% url 'frontend:chat' %}" class="text-green-600 hover:text-green-800 text-sm font-medium">
+                    View All Messages <i class="fas fa-arrow-right ml-1"></i>
+                </a>
+            </div>
+            
+            <div class="space-y-3">
+                {% for message in recent_messages %}
+                    <div class="flex items-start p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors">
+                        <div class="w-10 h-10 bg-green-600 text-white rounded-full flex items-center justify-center mr-3">
+                            <i class="fas fa-user text-sm"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center justify-between">
+                                <p class="text-sm font-medium text-gray-900">
+                                    {{ message.sender.get_full_name }}
+                                </p>
+                                <p class="text-xs text-gray-500">
+                                    {{ message.timestamp|timesince }} ago
+                                </p>
+                            </div>
+                            <p class="text-sm text-gray-700 mt-1 truncate">
+                                {{ message.content }}
+                            </p>
+                            <a href="{% url 'frontend:chat' %}?partner={{ message.sender.id }}&appointment={{ message.chat_room.appointment.id }}" 
+                               class="text-xs text-green-600 hover:text-green-800 mt-2 inline-block">
+                                Reply to {{ message.sender.get_full_name }} <i class="fas fa-reply ml-1"></i>
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% elif accepted_appointments %}
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-bold text-gray-800">
+                    <i class="fas fa-comments text-purple-600 mr-2"></i>
+                    Available Conversations
+                </h2>
+                <a href="{% url 'frontend:chat' %}" class="text-purple-600 hover:text-purple-800 text-sm font-medium">
+                    Start Messaging <i class="fas fa-arrow-right ml-1"></i>
+                </a>
+            </div>
+            
+            <div class="space-y-3">
+                {% for appointment in accepted_appointments|slice:":3" %}
+                    <div class="flex items-start p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors">
+                        <div class="w-10 h-10 bg-purple-600 text-white rounded-full flex items-center justify-center mr-3">
+                            <i class="fas fa-{% if user.role == 'patient' %}user-md{% else %}user{% endif %} text-sm"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center justify-between">
+                                <p class="text-sm font-medium text-gray-900">
+                                    {% if user.role == 'patient' %}
+                                        Dr. {{ appointment.doctor.user.get_full_name }}
+                                    {% else %}
+                                        {{ appointment.patient.user.get_full_name }}
+                                    {% endif %}
+                                </p>
+                                <span class="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">
+                                    Accepted
+                                </span>
+                            </div>
+                            <p class="text-sm text-gray-700 mt-1">
+                                Appointment: {{ appointment.appointment_date|date:"M d, Y H:i" }}
+                            </p>
+                            <a href="{% url 'frontend:chat' %}?partner={% if user.role == 'patient' %}{{ appointment.doctor.user.id }}{% else %}{{ appointment.patient.user.id }}{% endif %}&appointment={{ appointment.id }}" 
+                               class="text-xs text-purple-600 hover:text-purple-800 mt-2 inline-block">
+                                Start Conversation <i class="fas fa-comments ml-1"></i>
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Recent Activity -->
+    <div class="bg-white rounded-xl shadow-lg p-6">
+        <h2 class="text-xl font-bold text-gray-800 mb-4">
+            <i class="fas fa-clock text-primary mr-2"></i>
+            Recent Activity
+        </h2>
+        
+        <div class="space-y-4">
+            <div class="flex items-center p-4 bg-green-50 rounded-lg">
+                <div class="bg-primary text-white p-2 rounded-full mr-4">
+                    <i class="fas fa-user-check"></i>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-gray-800">Account Created</h3>
+                    <p class="text-gray-600 text-sm">Welcome to HealthCare+ Management System</p>
+                </div>
+                <div class="ml-auto text-sm text-gray-500">Today</div>
+            </div>
+            
+            {% if user.role == 'patient' %}
+                <div class="flex items-center p-4 bg-blue-50 rounded-lg">
+                    <div class="bg-secondary text-white p-2 rounded-full mr-4">
+                        <i class="fas fa-calendar-plus"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-800">Ready to Book</h3>
+                        <p class="text-gray-600 text-sm">You can now schedule appointments with our doctors</p>
+                    </div>
+                    <div class="ml-auto text-sm text-gray-500">Now</div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

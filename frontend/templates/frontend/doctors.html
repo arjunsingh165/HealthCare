@@ -1,0 +1,198 @@
+{% extends 'frontend/base.html' %}
+
+{% block title %}Our Doctors | HealthCare+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="mb-8">
+        <h1 class="text-4xl font-bold text-gray-800 mb-4">
+            <i class="fas fa-user-md text-primary mr-4"></i>Our Doctors
+        </h1>
+        <p class="text-gray-600">Connect with qualified healthcare professionals</p>
+    </div>
+
+    <!-- Search and Filter -->
+    <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Search Doctors</label>
+                <input type="text" id="searchInput" placeholder="Search by name or specialization..." 
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Specialization</label>
+                <select id="specializationFilter" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                    <option value="">All Specializations</option>
+                    {% for spec in specializations %}
+                        <option value="{{ spec }}">{{ spec }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Sort By</label>
+                <select id="sortBy" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                    <option value="name">Name</option>
+                    <option value="experience">Experience</option>
+                    <option value="fee">Consultation Fee</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Doctors Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="doctorsGrid">
+        {% for doctor in doctors %}
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow doctor-card" 
+             data-name="{{ doctor.user.first_name }} {{ doctor.user.last_name }}" 
+             data-specialization="{{ doctor.specialization|default:'General' }}"
+             data-experience="{{ doctor.experience_years|default:0 }}"
+             data-fee="{{ doctor.consultation_fee|default:0 }}">
+            
+            <div class="p-6">
+                <div class="flex items-center mb-4">
+                    <div class="w-16 h-16 bg-primary rounded-full flex items-center justify-center mr-4">
+                        <i class="fas fa-user-md text-white text-2xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-800">
+                            Dr. {{ doctor.user.first_name }} {{ doctor.user.last_name }}
+                        </h3>
+                        <p class="text-primary font-semibold">{{ doctor.specialization|default:"General Practitioner" }}</p>
+                    </div>
+                </div>
+                
+                <div class="space-y-2 mb-4">
+                    <div class="flex items-center text-gray-600">
+                        <i class="fas fa-graduation-cap mr-2"></i>
+                        <span>{{ doctor.experience_years|default:"New" }} years experience</span>
+                    </div>
+                    <div class="flex items-center text-gray-600">
+                        <i class="fas fa-envelope mr-2"></i>
+                        <span>{{ doctor.user.email }}</span>
+                    </div>
+                    {% if doctor.user.phone_number %}
+                    <div class="flex items-center text-gray-600">
+                        <i class="fas fa-phone mr-2"></i>
+                        <span>{{ doctor.user.phone_number }}</span>
+                    </div>
+                    {% endif %}
+                    {% if doctor.consultation_fee %}
+                    <div class="flex items-center text-gray-600">
+                        <i class="fas fa-dollar-sign mr-2"></i>
+                        <span>${{ doctor.consultation_fee }} consultation fee</span>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                {% if doctor.education %}
+                <div class="mb-4">
+                    <h4 class="font-semibold text-gray-800 mb-2">Education</h4>
+                    <p class="text-gray-600 text-sm">{{ doctor.education|truncatewords:15 }}</p>
+                </div>
+                {% endif %}
+                
+                <div class="flex space-x-2">
+                    {% if user.role == 'patient' %}
+                        <a href="{% url 'frontend:book_appointment' %}?doctor={{ doctor.id }}" 
+                           class="flex-1 bg-primary text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors text-center">
+                            <i class="fas fa-calendar-plus mr-2"></i>Book Appointment
+                        </a>
+                    {% elif user.role == 'admin' %}
+                        <a href="{% url 'admin:doctors_doctor_change' doctor.id %}" 
+                           class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-center">
+                            <i class="fas fa-edit mr-2"></i>Edit
+                        </a>
+                    {% else %}
+                        <button class="flex-1 bg-gray-400 text-white px-4 py-2 rounded-lg cursor-not-allowed" disabled>
+                            <i class="fas fa-eye mr-2"></i>View Only
+                        </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-span-full text-center py-12">
+            <i class="fas fa-user-md text-6xl text-gray-300 mb-4"></i>
+            <h3 class="text-xl font-semibold text-gray-600 mb-2">No Doctors Found</h3>
+            <p class="text-gray-500">No doctors are currently available in the system.</p>
+            {% if user.role == 'admin' %}
+                <a href="{% url 'admin:doctors_doctor_add' %}" 
+                   class="inline-block mt-4 bg-primary text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors">
+                    <i class="fas fa-plus mr-2"></i>Add Doctor
+                </a>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    
+    <!-- Call to Action for Non-Patients -->
+    {% if not user.is_authenticated or user.role != 'patient' %}
+        <div class="mt-12 bg-gradient-to-r from-primary to-secondary text-white rounded-xl p-8 text-center">
+            <h2 class="text-2xl font-bold mb-4">Want to Book an Appointment?</h2>
+            <p class="text-lg text-green-100 mb-6">Register as a patient to schedule consultations with our expert doctors</p>
+            {% if not user.is_authenticated %}
+                <a href="{% url 'frontend:register' %}" class="bg-white text-primary px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors inline-flex items-center">
+                    <i class="fas fa-user-plus mr-2"></i>
+                    Register as Patient
+                </a>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const specializationFilter = document.getElementById('specializationFilter');
+    const sortBy = document.getElementById('sortBy');
+    const doctorCards = document.querySelectorAll('.doctor-card');
+
+    function filterAndSort() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const selectedSpecialization = specializationFilter.value.toLowerCase();
+        const sortOption = sortBy.value;
+
+        // Filter cards
+        let visibleCards = Array.from(doctorCards).filter(card => {
+            const name = card.dataset.name.toLowerCase();
+            const specialization = card.dataset.specialization.toLowerCase();
+            
+            const matchesSearch = name.includes(searchTerm) || specialization.includes(searchTerm);
+            const matchesSpecialization = !selectedSpecialization || specialization.includes(selectedSpecialization);
+            
+            if (matchesSearch && matchesSpecialization) {
+                card.style.display = 'block';
+                return true;
+            } else {
+                card.style.display = 'none';
+                return false;
+            }
+        });
+
+        // Sort visible cards
+        visibleCards.sort((a, b) => {
+            switch(sortOption) {
+                case 'name':
+                    return a.dataset.name.localeCompare(b.dataset.name);
+                case 'experience':
+                    return parseInt(b.dataset.experience) - parseInt(a.dataset.experience);
+                case 'fee':
+                    return parseInt(a.dataset.fee) - parseInt(b.dataset.fee);
+                default:
+                    return 0;
+            }
+        });
+
+        // Reorder DOM elements
+        const grid = document.getElementById('doctorsGrid');
+        visibleCards.forEach(card => {
+            grid.appendChild(card);
+        });
+    }
+
+    searchInput.addEventListener('input', filterAndSort);
+    specializationFilter.addEventListener('change', filterAndSort);
+    sortBy.addEventListener('change', filterAndSort);
+});
+</script>
+{% endblock %}

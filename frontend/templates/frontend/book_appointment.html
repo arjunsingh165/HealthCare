@@ -1,0 +1,232 @@
+{% extends 'frontend/base.html' %}
+
+{% block title %}Book Appointment | HealthCare+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-2xl mx-auto">
+        <div class="mb-8">
+            <h1 class="text-4xl font-bold text-gray-800 mb-4">
+                <i class="fas fa-calendar-plus text-primary mr-4"></i>Book Appointment
+            </h1>
+            <p class="text-gray-600">Schedule a consultation with our qualified doctors</p>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="mb-6 p-4 rounded-lg {% if message.tags == 'success' %}bg-green-100 text-green-700{% elif message.tags == 'error' %}bg-red-100 text-red-700{% else %}bg-blue-100 text-blue-700{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="bg-white rounded-xl shadow-lg p-8">
+            <form method="POST" class="space-y-6">
+                {% csrf_token %}
+                
+                <!-- Doctor Selection -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Select Doctor *</label>
+                    <select name="doctor" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                        <option value="">Choose a doctor...</option>
+                        {% for doctor in doctors %}
+                            <option value="{{ doctor.id }}" {% if selected_doctor == doctor.id %}selected{% endif %}>
+                                Dr. {{ doctor.user.first_name }} {{ doctor.user.last_name }} - {{ doctor.specialization|default:"General Practitioner" }}
+                                {% if doctor.consultation_fee %}(${{ doctor.consultation_fee }}){% endif %}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Appointment Date -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Preferred Date *</label>
+                        <input type="date" name="appointment_date" required 
+                               min="{{ tomorrow|date:'Y-m-d' }}"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Preferred Time *</label>
+                        <select name="appointment_time" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                            <option value="">Select time...</option>
+                            <option value="09:00">9:00 AM</option>
+                            <option value="09:30">9:30 AM</option>
+                            <option value="10:00">10:00 AM</option>
+                            <option value="10:30">10:30 AM</option>
+                            <option value="11:00">11:00 AM</option>
+                            <option value="11:30">11:30 AM</option>
+                            <option value="14:00">2:00 PM</option>
+                            <option value="14:30">2:30 PM</option>
+                            <option value="15:00">3:00 PM</option>
+                            <option value="15:30">3:30 PM</option>
+                            <option value="16:00">4:00 PM</option>
+                            <option value="16:30">4:30 PM</option>
+                            <option value="17:00">5:00 PM</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Patient Information -->
+                <div class="border-t pt-6">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4">Patient Information</h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">First Name *</label>
+                            <input type="text" name="first_name" value="{{ user.first_name }}" required
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Last Name *</label>
+                            <input type="text" name="last_name" value="{{ user.last_name }}" required
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Email *</label>
+                            <input type="email" name="email" value="{{ user.email }}" required readonly
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Phone Number *</label>
+                            <input type="tel" name="phone_number" value="{{ user.phone_number }}" required
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Date of Birth</label>
+                        <input type="date" name="date_of_birth" value="{{ user.date_of_birth|date:'Y-m-d' }}"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                    </div>
+                </div>
+
+                <!-- Medical Information -->
+                <div class="border-t pt-6">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4">Medical Information</h3>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Current Symptoms *</label>
+                        <textarea name="symptoms" rows="4" required placeholder="Please describe your current symptoms, concerns, or reason for the appointment..."
+                                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">{{ patient.symptoms|default:'' }}</textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Medical History</label>
+                        <textarea name="medical_history" rows="3" placeholder="Previous medical conditions, surgeries, medications..."
+                                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">{{ patient.medical_history|default:'' }}</textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Allergies</label>
+                        <textarea name="allergies" rows="2" placeholder="Any known allergies to medications, foods, etc..."
+                                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">{{ patient.allergies|default:'' }}</textarea>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Emergency Contact Name</label>
+                            <input type="text" name="emergency_contact_name" value="{{ patient.emergency_contact_name|default:'' }}"
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Emergency Contact Phone</label>
+                            <input type="tel" name="emergency_contact_phone" value="{{ patient.emergency_contact_phone|default:'' }}"
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Additional Notes -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Additional Notes</label>
+                    <textarea name="additional_notes" rows="3" placeholder="Any additional information you'd like the doctor to know..."
+                              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"></textarea>
+                </div>
+
+                <!-- Appointment Type -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Appointment Type</label>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="flex items-center">
+                            <input type="radio" name="appointment_type" value="consultation" id="consultation" checked
+                                   class="h-4 w-4 text-primary focus:ring-primary border-gray-300">
+                            <label for="consultation" class="ml-3 block text-sm font-medium text-gray-700">
+                                General Consultation
+                            </label>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="radio" name="appointment_type" value="follow_up" id="follow_up"
+                                   class="h-4 w-4 text-primary focus:ring-primary border-gray-300">
+                            <label for="follow_up" class="ml-3 block text-sm font-medium text-gray-700">
+                                Follow-up Visit
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Terms and Conditions -->
+                <div class="border-t pt-6">
+                    <div class="flex items-center">
+                        <input type="checkbox" name="terms_accepted" id="terms" required
+                               class="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded">
+                        <label for="terms" class="ml-3 block text-sm text-gray-700">
+                            I agree to the <a href="#" class="text-primary hover:underline">terms and conditions</a> and 
+                            <a href="#" class="text-primary hover:underline">privacy policy</a>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Submit Buttons -->
+                <div class="flex space-x-4">
+                    <button type="submit" class="flex-1 bg-primary text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors font-semibold">
+                        <i class="fas fa-calendar-check mr-2"></i>Book Appointment
+                    </button>
+                    <a href="{% url 'frontend:doctors' %}" class="flex-1 bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition-colors text-center font-semibold">
+                        <i class="fas fa-times mr-2"></i>Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Information Box -->
+        <div class="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
+            <h3 class="text-lg font-semibold text-blue-800 mb-3">
+                <i class="fas fa-info-circle mr-2"></i>Important Information
+            </h3>
+            <ul class="text-blue-700 space-y-2 text-sm">
+                <li><i class="fas fa-check mr-2"></i>Appointment requests are subject to doctor approval</li>
+                <li><i class="fas fa-check mr-2"></i>You will receive confirmation via email once approved</li>
+                <li><i class="fas fa-check mr-2"></i>Please arrive 15 minutes before your scheduled time</li>
+                <li><i class="fas fa-check mr-2"></i>Bring a valid ID and insurance card if applicable</li>
+                <li><i class="fas fa-check mr-2"></i>Cancellations must be made at least 24 hours in advance</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-select doctor if provided in URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const doctorId = urlParams.get('doctor');
+    if (doctorId) {
+        const doctorSelect = document.querySelector('select[name="doctor"]');
+        if (doctorSelect) {
+            doctorSelect.value = doctorId;
+        }
+    }
+
+    // Set minimum date to tomorrow
+    const dateInput = document.querySelector('input[name="appointment_date"]');
+    if (dateInput) {
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        dateInput.min = tomorrow.toISOString().split('T')[0];
+    }
+});
+</script>
+{% endblock %}

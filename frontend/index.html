@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Healthcare Management System</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="#"><i class="fas fa-heartbeat me-2"></i>HealthCare+</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto" id="navItems">
+                    <!-- Dynamic navigation items will be inserted here -->
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container-fluid mt-5 pt-4">
+        <!-- Login/Register Modal -->
+        <div class="modal fade" id="authModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="authModalTitle">Login</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Login Form -->
+                        <div id="loginForm">
+                            <form id="loginFormElement">
+                                <div class="mb-3">
+                                    <label for="loginEmail" class="form-label">Email</label>
+                                    <input type="email" class="form-control" id="loginEmail" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="loginPassword" class="form-label">Password</label>
+                                    <input type="password" class="form-control" id="loginPassword" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100">Login</button>
+                            </form>
+                            <div class="text-center mt-3">
+                                <span>Don't have an account? </span>
+                                <a href="#" onclick="showRegisterForm()">Register here</a>
+                            </div>
+                        </div>
+
+                        <!-- Register Form -->
+                        <div id="registerForm" style="display: none;">
+                            <form id="registerFormElement">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="registerFirstName" class="form-label">First Name</label>
+                                            <input type="text" class="form-control" id="registerFirstName" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="registerLastName" class="form-label">Last Name</label>
+                                            <input type="text" class="form-control" id="registerLastName" required>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="registerEmail" class="form-label">Email</label>
+                                    <input type="email" class="form-control" id="registerEmail" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="registerRole" class="form-label">Role</label>
+                                    <select class="form-control" id="registerRole" required>
+                                        <option value="">Select Role</option>
+                                        <option value="patient">Patient</option>
+                                        <option value="doctor">Doctor</option>
+                                        <option value="user">General User</option>
+                                    </select>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="registerPassword" class="form-label">Password</label>
+                                            <input type="password" class="form-control" id="registerPassword" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="registerPasswordConfirm" class="form-label">Confirm Password</label>
+                                            <input type="password" class="form-control" id="registerPasswordConfirm" required>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-success w-100">Register</button>
+                            </form>
+                            <div class="text-center mt-3">
+                                <span>Already have an account? </span>
+                                <a href="#" onclick="showLoginForm()">Login here</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content Area -->
+        <div id="content">
+            <!-- Welcome Section -->
+            <div id="welcomeSection" class="text-center py-5">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <h1 class="display-4 text-primary mb-4">
+                                <i class="fas fa-heartbeat me-3"></i>
+                                Welcome to HealthCare+
+                            </h1>
+                            <p class="lead mb-5">Comprehensive Healthcare Management System</p>
+                            
+                            <div class="row g-4 mb-5">
+                                <div class="col-md-3">
+                                    <div class="card h-100 text-center border-0 shadow-sm">
+                                        <div class="card-body">
+                                            <i class="fas fa-user-md fa-3x text-primary mb-3"></i>
+                                            <h5 class="card-title">Expert Doctors</h5>
+                                            <p class="card-text">Connect with qualified healthcare professionals</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card h-100 text-center border-0 shadow-sm">
+                                        <div class="card-body">
+                                            <i class="fas fa-calendar-alt fa-3x text-success mb-3"></i>
+                                            <h5 class="card-title">Easy Scheduling</h5>
+                                            <p class="card-text">Book appointments with ease</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card h-100 text-center border-0 shadow-sm">
+                                        <div class="card-body">
+                                            <i class="fas fa-comments fa-3x text-info mb-3"></i>
+                                            <h5 class="card-title">Secure Chat</h5>
+                                            <p class="card-text">Communicate securely with healthcare providers</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card h-100 text-center border-0 shadow-sm">
+                                        <div class="card-body">
+                                            <i class="fas fa-shield-alt fa-3x text-warning mb-3"></i>
+                                            <h5 class="card-title">Secure & Private</h5>
+                                            <p class="card-text">Your health data is protected</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <button class="btn btn-primary btn-lg me-3" onclick="showAuthModal('login')">
+                                <i class="fas fa-sign-in-alt me-2"></i>Login
+                            </button>
+                            <button class="btn btn-outline-primary btn-lg" onclick="showAuthModal('register')">
+                                <i class="fas fa-user-plus me-2"></i>Register
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dynamic Content Sections -->
+            <div id="dashboardSection" style="display: none;">
+                <div class="row">
+                    <div class="col-lg-3">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5><i class="fas fa-bars me-2"></i>Navigation</h5>
+                            </div>
+                            <div class="list-group list-group-flush" id="sideNav">
+                                <!-- Dynamic navigation items -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-9">
+                        <div id="mainContent">
+                            <!-- Dynamic main content -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-light py-4 mt-5">
+        <div class="container text-center">
+            <p>&copy; 2024 HealthCare+ Management System. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,310 @@
+{% extends 'frontend/base.html' %}
+
+{% block title %}Messages | HealthCare+{% endblock %}
+
+{% block content %}
+<div class="px-4 py-8">
+    <div class="bg-gradient-to-r from-accent to-primary text-white rounded-xl p-6 mb-8">
+        <h1 class="text-3xl font-bold mb-2">
+            <i class="fas fa-comments mr-3"></i>
+            Secure Messaging
+        </h1>
+        <p class="text-yellow-100">Communicate securely with {% if user.role == 'doctor' %}patients{% else %}doctors{% endif %}</p>
+    </div>
+    
+    {% if error %}
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+            {{ error }}
+        </div>
+    {% endif %}
+    
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Conversations List -->
+        <div class="lg:col-span-1">
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">
+                    <i class="fas fa-users mr-2"></i>Conversations
+                </h2>
+                
+                {% if conversations %}
+                    <div class="space-y-3">
+                        {% for conv in conversations %}
+                            <a href="{% url 'frontend:chat' %}?partner={{ conv.partner.id }}&appointment={{ conv.appointment.id }}" 
+                               class="block p-4 border rounded-lg hover:bg-gray-50 transition-colors
+                                      {% if active_chat and active_chat.partner.id == conv.partner.id %}bg-blue-50 border-blue-300{% else %}border-gray-200{% endif %}">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-sm font-medium text-gray-900 truncate">
+                                            {{ conv.partner_name }}
+                                        </p>
+                                        <p class="text-xs text-gray-500">
+                                            {{ conv.partner_role }} • {{ conv.appointment.appointment_date|date:"M d, Y" }}
+                                        </p>
+                                        <p class="text-xs text-gray-600 truncate">
+                                            {{ conv.latest_message }}
+                                        </p>
+                                        {% if conv.unread_count > 0 %}
+                                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                                {{ conv.unread_count }} new
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-8">
+                        <i class="fas fa-comments text-4xl text-gray-300 mb-4"></i>
+                        <p class="text-gray-600 mb-2">No conversations available</p>
+                        <p class="text-sm text-gray-500">
+                            {% if user.role == 'patient' %}
+                                You can chat with doctors after your appointments are accepted.
+                            {% else %}
+                                You can chat with patients after accepting their appointments.
+                            {% endif %}
+                        </p>
+                        <a href="{% url 'frontend:appointments' %}" class="mt-4 inline-block bg-primary text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
+                            <i class="fas fa-calendar-check mr-2"></i>View Appointments
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Chat Area -->
+        <div class="lg:col-span-2">
+            <div class="bg-white rounded-xl shadow-lg h-96 flex flex-col">
+                {% if active_chat %}
+                    <!-- Chat Header -->
+                    <div class="p-4 border-b border-gray-200">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-gray-800">
+                                    {% if user.role == 'patient' %}
+                                        Dr. {{ active_chat.partner.get_full_name }}
+                                    {% else %}
+                                        {{ active_chat.partner.get_full_name }}
+                                    {% endif %}
+                                </h3>
+                                <p class="text-sm text-gray-600">
+                                    Appointment: {{ active_chat.appointment.appointment_date|date:"M d, Y H:i" }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Messages Area -->
+                    <div class="flex-1 p-4 overflow-y-auto bg-gray-50" id="messagesArea">
+                        <div class="space-y-4">
+                            {% if active_chat.messages %}
+                                {% for message in active_chat.messages %}
+                                    <div class="{% if message.sender == user %}bg-blue-100 ml-auto{% else %}bg-white{% endif %} p-3 rounded-lg shadow-sm max-w-xs">
+                                        <p class="text-sm text-gray-800">{{ message.content }}</p>
+                                        <p class="text-xs text-gray-500 mt-1">
+                                            {% if message.sender == user %}
+                                                You
+                                            {% else %}
+                                                {{ message.sender.get_full_name }}
+                                            {% endif %}
+                                            • {{ message.timestamp|date:"M d, H:i" }}
+                                        </p>
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="text-center py-4">
+                                    <p class="text-sm text-gray-500">
+                                        <i class="fas fa-info-circle mr-1"></i>
+                                        No messages yet. Start the conversation!
+                                    </p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Message Input -->
+                    <div class="p-4 border-t border-gray-200">
+                        <form method="post" id="messageForm">
+                            {% csrf_token %}
+                            <input type="hidden" name="appointment_id" value="{{ active_chat.appointment.id }}">
+                            <div class="flex space-x-2">
+                                <input type="text" name="message" id="messageInput" placeholder="Type your message..." 
+                                       class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                       required>
+                                <button type="submit" class="bg-primary text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                            </div>
+                        </form>
+                        <p class="text-xs text-gray-500 mt-2">
+                            <i class="fas fa-lock mr-1"></i>Messages are encrypted and secure
+                        </p>
+                    </div>
+                {% else %}
+                    <!-- No active chat -->
+                    <div class="flex-1 flex items-center justify-center">
+                        <div class="text-center">
+                            <i class="fas fa-comments text-6xl text-gray-300 mb-4"></i>
+                            <h3 class="text-xl font-semibold text-gray-800 mb-2">Select a Conversation</h3>
+                            <p class="text-gray-600">Choose a conversation from the left to start messaging</p>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    {% if not conversations %}
+        <div class="mt-8 bg-blue-50 border border-blue-200 rounded-xl p-6">
+            <h3 class="text-lg font-semibold text-blue-800 mb-2">
+                <i class="fas fa-lightbulb mr-2"></i>How to Start Chatting
+            </h3>
+            <div class="text-blue-700">
+                {% if user.role == 'patient' %}
+                    <ol class="list-decimal list-inside space-y-1">
+                        <li>Book an appointment with a doctor</li>
+                        <li>Wait for the doctor to accept your appointment</li>
+                        <li>Once accepted, you can chat with the doctor here</li>
+                    </ol>
+                {% else %}
+                    <ol class="list-decimal list-inside space-y-1">
+                        <li>Review appointment requests in the Patients section</li>
+                        <li>Accept appointments from patients</li>
+                        <li>Once accepted, you can chat with patients here</li>
+                    </ol>
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const messageForm = document.getElementById('messageForm');
+    const messageInput = document.getElementById('messageInput');
+    const messagesArea = document.getElementById('messagesArea');
+    
+    // Auto-scroll to bottom of messages
+    function scrollToBottom() {
+        if (messagesArea) {
+            messagesArea.scrollTop = messagesArea.scrollHeight;
+        }
+    }
+    
+    // Initial scroll to bottom
+    scrollToBottom();
+    
+    // Handle form submission with AJAX
+    if (messageForm) {
+        messageForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(messageForm);
+            const messageText = messageInput.value.trim();
+            
+            if (!messageText) {
+                return;
+            }
+            
+            // Disable form while sending
+            messageInput.disabled = true;
+            const submitBtn = messageForm.querySelector('button[type="submit"]');
+            const originalBtnText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            
+            fetch(window.location.href, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Clear input
+                    messageInput.value = '';
+                    
+                    // Add message to chat immediately for better UX
+                    const messageDiv = document.createElement('div');
+                    messageDiv.className = 'bg-blue-100 ml-auto p-3 rounded-lg shadow-sm max-w-xs';
+                    messageDiv.innerHTML = `
+                        <p class="text-sm text-gray-800">${messageText}</p>
+                        <p class="text-xs text-gray-500 mt-1">You • Just now</p>
+                    `;
+                    
+                    const messagesContainer = messagesArea.querySelector('.space-y-4');
+                    messagesContainer.appendChild(messageDiv);
+                    scrollToBottom();
+                    
+                    // Reload page after a short delay to get all messages
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    alert('Error sending message: ' + (data.error || 'Unknown error'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error sending message. Please try again.');
+            })
+            .finally(() => {
+                // Re-enable form
+                messageInput.disabled = false;
+                submitBtn.innerHTML = originalBtnText;
+                messageInput.focus();
+            });
+        });
+    }
+    
+    // Auto-refresh messages every 10 seconds
+    if (window.location.search.includes('partner=')) {
+        setInterval(() => {
+            // Only refresh if user is not typing
+            if (document.activeElement !== messageInput) {
+                const currentScrollPos = messagesArea.scrollTop;
+                const isAtBottom = messagesArea.scrollHeight - messagesArea.clientHeight <= currentScrollPos + 1;
+                
+                fetch(window.location.href)
+                .then(response => response.text())
+                .then(html => {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const newMessagesArea = doc.getElementById('messagesArea');
+                    
+                    if (newMessagesArea) {
+                        messagesArea.innerHTML = newMessagesArea.innerHTML;
+                        
+                        // Scroll to bottom if user was at bottom before refresh
+                        if (isAtBottom) {
+                            scrollToBottom();
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Auto-refresh error:', error);
+                });
+            }
+        }, 10000); // Refresh every 10 seconds
+    }
+    
+    // Enter key to send message
+    if (messageInput) {
+        messageInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                messageForm.dispatchEvent(new Event('submit'));
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

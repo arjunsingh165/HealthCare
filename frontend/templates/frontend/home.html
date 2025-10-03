@@ -1,0 +1,162 @@
+{% extends 'frontend/base.html' %}
+
+{% block title %}Welcome to HealthCare+ | Healthcare Management System{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="bg-gradient-to-r from-primary to-secondary text-white">
+    <div class="px-4 py-16 mx-auto max-w-7xl">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div>
+                <h1 class="text-4xl md:text-6xl font-bold mb-6 leading-tight">
+                    Your Health, <br>
+                    <span class="text-accent">Our Priority</span>
+                </h1>
+                <p class="text-xl mb-8 text-blue-100">
+                    Connect with qualified doctors, book appointments, and manage your health records all in one secure platform.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4">
+                    {% if not user.is_authenticated %}
+                        <a href="{% url 'frontend:register' %}" class="bg-accent hover:bg-yellow-500 text-white px-8 py-4 rounded-lg text-lg font-semibold transition-colors inline-flex items-center justify-center">
+                            <i class="fas fa-user-plus mr-2"></i>
+                            Get Started Today
+                        </a>
+                        <a href="{% url 'frontend:login' %}" class="border-2 border-white text-white hover:bg-white hover:text-primary px-8 py-4 rounded-lg text-lg font-semibold transition-colors inline-flex items-center justify-center">
+                            <i class="fas fa-sign-in-alt mr-2"></i>
+                            Sign In
+                        </a>
+                    {% else %}
+                        <a href="{% url 'frontend:dashboard' %}" class="bg-accent hover:bg-yellow-500 text-white px-8 py-4 rounded-lg text-lg font-semibold transition-colors inline-flex items-center justify-center">
+                            <i class="fas fa-tachometer-alt mr-2"></i>
+                            Go to Dashboard
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="text-center">
+                <div class="relative">
+                    <div class="bg-white bg-opacity-20 rounded-2xl p-8 backdrop-blur-sm">
+                        <i class="fas fa-heartbeat text-8xl text-accent mb-4"></i>
+                        <h3 class="text-2xl font-bold mb-2">24/7 Healthcare</h3>
+                        <p class="text-blue-100">Always here when you need us</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="py-16 bg-white">
+    <div class="px-4 mx-auto max-w-7xl">
+        <div class="text-center mb-16">
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
+                Why Choose HealthCare+?
+            </h2>
+            <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                Our comprehensive healthcare management system brings together patients, doctors, and administrators for seamless healthcare delivery.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <!-- Patient Features -->
+            <div class="bg-green-50 rounded-xl p-6 text-center hover:shadow-lg transition-shadow">
+                <div class="bg-primary text-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-user-injured text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800 mb-2">For Patients</h3>
+                <ul class="text-gray-600 space-y-1 text-left">
+                    <li><i class="fas fa-check text-primary mr-2"></i>Easy Registration</li>
+                    <li><i class="fas fa-check text-primary mr-2"></i>Book Appointments</li>
+                    <li><i class="fas fa-check text-primary mr-2"></i>Medical Records</li>
+                    <li><i class="fas fa-check text-primary mr-2"></i>Chat with Doctors</li>
+                </ul>
+            </div>
+
+            <!-- Doctor Features -->
+            <div class="bg-blue-50 rounded-xl p-6 text-center hover:shadow-lg transition-shadow">
+                <div class="bg-secondary text-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-user-md text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800 mb-2">For Doctors</h3>
+                <ul class="text-gray-600 space-y-1 text-left">
+                    <li><i class="fas fa-check text-secondary mr-2"></i>Patient Management</li>
+                    <li><i class="fas fa-check text-secondary mr-2"></i>Appointment Scheduling</li>
+                    <li><i class="fas fa-check text-secondary mr-2"></i>Medical History Access</li>
+                    <li><i class="fas fa-check text-secondary mr-2"></i>Secure Messaging</li>
+                </ul>
+            </div>
+
+            <!-- Admin Features -->
+            <div class="bg-yellow-50 rounded-xl p-6 text-center hover:shadow-lg transition-shadow">
+                <div class="bg-accent text-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-user-shield text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800 mb-2">For Admins</h3>
+                <ul class="text-gray-600 space-y-1 text-left">
+                    <li><i class="fas fa-check text-accent mr-2"></i>User Management</li>
+                    <li><i class="fas fa-check text-accent mr-2"></i>System Analytics</li>
+                    <li><i class="fas fa-check text-accent mr-2"></i>Data Reports</li>
+                    <li><i class="fas fa-check text-accent mr-2"></i>System Configuration</li>
+                </ul>
+            </div>
+
+            <!-- General Users -->
+            <div class="bg-purple-50 rounded-xl p-6 text-center hover:shadow-lg transition-shadow">
+                <div class="bg-purple-600 text-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-users text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800 mb-2">For Everyone</h3>
+                <ul class="text-gray-600 space-y-1 text-left">
+                    <li><i class="fas fa-check text-purple-600 mr-2"></i>Browse Doctors</li>
+                    <li><i class="fas fa-check text-purple-600 mr-2"></i>View Services</li>
+                    <li><i class="fas fa-check text-purple-600 mr-2"></i>Health Information</li>
+                    <li><i class="fas fa-check text-purple-600 mr-2"></i>Contact Support</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Stats Section -->
+<div class="py-16 bg-gray-800 text-white">
+    <div class="px-4 mx-auto max-w-7xl">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
+            <div>
+                <div class="text-4xl font-bold text-primary mb-2">24/7</div>
+                <div class="text-gray-300">Available Support</div>
+            </div>
+            <div>
+                <div class="text-4xl font-bold text-secondary mb-2">500+</div>
+                <div class="text-gray-300">Qualified Doctors</div>
+            </div>
+            <div>
+                <div class="text-4xl font-bold text-accent mb-2">10K+</div>
+                <div class="text-gray-300">Happy Patients</div>
+            </div>
+            <div>
+                <div class="text-4xl font-bold text-success mb-2">99.9%</div>
+                <div class="text-gray-300">System Uptime</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CTA Section -->
+<div class="py-16 bg-primary">
+    <div class="px-4 mx-auto max-w-7xl text-center">
+        <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">
+            Ready to Transform Your Healthcare Experience?
+        </h2>
+        <p class="text-xl text-green-100 mb-8 max-w-2xl mx-auto">
+            Join thousands of patients and doctors who trust HealthCare+ for their healthcare management needs.
+        </p>
+        {% if not user.is_authenticated %}
+            <a href="{% url 'frontend:register' %}" class="bg-white text-primary hover:bg-gray-100 px-8 py-4 rounded-lg text-lg font-semibold transition-colors inline-flex items-center">
+                <i class="fas fa-rocket mr-2"></i>
+                Start Your Journey Today
+            </a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

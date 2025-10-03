@@ -1,0 +1,266 @@
+{% extends 'frontend/base.html' %}
+
+{% block title %}Patients | HealthCare+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="mb-8">
+        <h1 class="text-4xl font-bold text-gray-800 mb-4">
+            <i class="fas fa-users text-primary mr-4"></i>
+            {% if user.role == 'doctor' %}
+                My Patients
+            {% elif user.role == 'admin' %}
+                All Patients
+            {% else %}
+                Patient Directory
+            {% endif %}
+        </h1>
+        <p class="text-gray-600">
+            {% if user.role == 'doctor' %}
+                Manage your patient consultations and medical records
+            {% elif user.role == 'admin' %}
+                Complete patient management system
+            {% else %}
+                View patient-doctor appointments and mappings
+            {% endif %}
+        </p>
+    </div>
+
+    <!-- Search and Filter -->
+    <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Search Patients</label>
+                <input type="text" id="searchInput" placeholder="Search by name or symptoms..." 
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                <select id="statusFilter" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                    <option value="">All Statuses</option>
+                    {% if user.role == 'doctor' %}
+                        <option value="pending">Pending Requests</option>
+                        <option value="approved">Approved Patients</option>
+                    {% else %}
+                        <option value="active">Active Patients</option>
+                        <option value="inactive">Inactive Patients</option>
+                    {% endif %}
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Sort By</label>
+                <select id="sortBy" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                    <option value="name">Name</option>
+                    <option value="date">Registration Date</option>
+                    {% if user.role == 'doctor' %}
+                        <option value="appointments">Recent Appointments</option>
+                    {% endif %}
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Patients Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="patientsGrid">
+        {% for patient in patients %}
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow patient-card" 
+             data-name="{{ patient.user.first_name }} {{ patient.user.last_name }}" 
+             data-symptoms="{{ patient.symptoms|default:'' }}"
+             data-date="{{ patient.user.date_joined|date:'Y-m-d' }}">
+            
+            <div class="p-6">
+                <div class="flex items-center mb-4">
+                    <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mr-4">
+                        <i class="fas fa-user text-blue-600 text-2xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-800">
+                            {{ patient.user.first_name }} {{ patient.user.last_name }}
+                        </h3>
+                        <p class="text-gray-600">Patient ID: #{{ patient.id|stringformat:"04d" }}</p>
+                    </div>
+                </div>
+                
+                <div class="space-y-2 mb-4">
+                    <div class="flex items-center text-gray-600">
+                        <i class="fas fa-envelope mr-2"></i>
+                        <span class="text-sm">{{ patient.user.email }}</span>
+                    </div>
+                    {% if patient.user.phone_number %}
+                    <div class="flex items-center text-gray-600">
+                        <i class="fas fa-phone mr-2"></i>
+                        <span class="text-sm">{{ patient.user.phone_number }}</span>
+                    </div>
+                    {% endif %}
+                    {% if patient.user.date_of_birth %}
+                    <div class="flex items-center text-gray-600">
+                        <i class="fas fa-birthday-cake mr-2"></i>
+                        <span class="text-sm">{{ patient.user.date_of_birth|date:"M d, Y" }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                {% if patient.symptoms %}
+                <div class="mb-4">
+                    <h4 class="font-semibold text-gray-800 mb-2">Current Symptoms</h4>
+                    <p class="text-gray-600 text-sm bg-gray-50 p-2 rounded">{{ patient.symptoms|truncatewords:20 }}</p>
+                </div>
+                {% endif %}
+                
+                <!-- Show doctor assignments for general users -->
+                {% if user.role == 'user' %}
+                    {% if patient.current_doctor %}
+                    <div class="mb-4">
+                        <h4 class="font-semibold text-gray-800 mb-2">Assigned Doctor</h4>
+                        <div class="bg-primary bg-opacity-10 p-3 rounded-lg">
+                            <p class="text-primary font-semibold">
+                                Dr. {{ patient.current_doctor.user.first_name }} {{ patient.current_doctor.user.last_name }}
+                            </p>
+                            <p class="text-sm text-gray-600">{{ patient.current_doctor.specialization|default:"General Practitioner" }}</p>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="mb-4">
+                        <div class="bg-yellow-50 p-3 rounded-lg">
+                            <p class="text-yellow-700 text-sm">No doctor assigned yet</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                {% endif %}
+                
+                <!-- Show pending requests for doctors -->
+                {% if user.role == 'doctor' %}
+                    {% if patient.pending_appointment %}
+                    <div class="mb-4">
+                        <div class="bg-yellow-50 p-3 rounded-lg">
+                            <p class="text-yellow-700 text-sm font-semibold">Appointment Request Pending</p>
+                            <p class="text-xs text-gray-600">{{ patient.pending_appointment.created_at|date:"M d, Y" }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                {% endif %}
+                
+                <div class="flex space-x-2">
+                    {% if user.role == 'doctor' %}
+                        {% if patient.pending_appointment %}
+                            <form method="POST" action="{% url 'frontend:approve_appointment' patient.pending_appointment.id %}" class="flex-1">
+                                {% csrf_token %}
+                                <button type="submit" class="w-full bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors text-sm">
+                                    <i class="fas fa-check mr-2"></i>Approve
+                                </button>
+                            </form>
+                            <form method="POST" action="{% url 'frontend:reject_appointment' patient.pending_appointment.id %}" class="flex-1">
+                                {% csrf_token %}
+                                <button type="submit" class="w-full bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors text-sm">
+                                    <i class="fas fa-times mr-2"></i>Reject
+                                </button>
+                            </form>
+                        {% else %}
+                            <a href="{% url 'frontend:chat' %}?patient={{ patient.id }}" 
+                               class="flex-1 bg-primary text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors text-center text-sm">
+                                <i class="fas fa-comments mr-2"></i>Chat
+                            </a>
+                        {% endif %}
+                    {% elif user.role == 'admin' %}
+                        <a href="{% url 'admin:patients_patient_change' patient.id %}" 
+                           class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-center text-sm">
+                            <i class="fas fa-edit mr-2"></i>Edit
+                        </a>
+                    {% else %}
+                        <button class="flex-1 bg-gray-400 text-white px-4 py-2 rounded-lg cursor-not-allowed text-sm" disabled>
+                            <i class="fas fa-eye mr-2"></i>View Only
+                        </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-span-full text-center py-12">
+            <i class="fas fa-users text-6xl text-gray-300 mb-4"></i>
+            <h3 class="text-xl font-semibold text-gray-600 mb-2">No Patients Found</h3>
+            <p class="text-gray-500">
+                {% if user.role == 'doctor' %}
+                    No patients have requested appointments with you yet.
+                {% else %}
+                    No patients are currently registered in the system.
+                {% endif %}
+            </p>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <div class="mt-8 flex justify-center">
+        <nav class="flex space-x-2">
+            {% if page_obj.has_previous %}
+                <a href="?page=1" class="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">First</a>
+                <a href="?page={{ page_obj.previous_page_number }}" class="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Previous</a>
+            {% endif %}
+            
+            <span class="px-4 py-2 bg-primary text-white rounded-lg">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+            </span>
+            
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}" class="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Next</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}" class="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Last</a>
+            {% endif %}
+        </nav>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const statusFilter = document.getElementById('statusFilter');
+    const sortBy = document.getElementById('sortBy');
+    const patientCards = document.querySelectorAll('.patient-card');
+
+    function filterAndSort() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const selectedStatus = statusFilter.value.toLowerCase();
+        const sortOption = sortBy.value;
+
+        // Filter cards
+        let visibleCards = Array.from(patientCards).filter(card => {
+            const name = card.dataset.name.toLowerCase();
+            const symptoms = card.dataset.symptoms.toLowerCase();
+            
+            const matchesSearch = name.includes(searchTerm) || symptoms.includes(searchTerm);
+            
+            if (matchesSearch) {
+                card.style.display = 'block';
+                return true;
+            } else {
+                card.style.display = 'none';
+                return false;
+            }
+        });
+
+        // Sort visible cards
+        visibleCards.sort((a, b) => {
+            switch(sortOption) {
+                case 'name':
+                    return a.dataset.name.localeCompare(b.dataset.name);
+                case 'date':
+                    return new Date(b.dataset.date) - new Date(a.dataset.date);
+                default:
+                    return 0;
+            }
+        });
+
+        // Reorder DOM elements
+        const grid = document.getElementById('patientsGrid');
+        visibleCards.forEach(card => {
+            grid.appendChild(card);
+        });
+    }
+
+    searchInput.addEventListener('input', filterAndSort);
+    statusFilter.addEventListener('change', filterAndSort);
+    sortBy.addEventListener('change', filterAndSort);
+});
+</script>
+{% endblock %}
