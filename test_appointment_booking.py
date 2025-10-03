@@ -94,10 +94,10 @@ def test_appointment_system():
     
     print("\n=== TEST COMPLETED SUCCESSFULLY ===")
     print("\nLogin credentials to test in browser:")
-    print("Patient: patient1@healthcare.com / patient123")
-    print("Doctor: dr.smith@healthcare.com / doctor123")
-    print("Admin: admin@healthcare.com / admin123")
-    print("\nServer URL: http://127.0.0.1:8000/")
+    print("Patient: ")
+    print("Doctor: ")
+    print("Admin: ")
+    print("\nServer URL: https://")
 
 if __name__ == "__main__":
     test_appointment_system()
