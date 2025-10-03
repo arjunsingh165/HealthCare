@@ -216,18 +216,18 @@ npm start
 After running migrations and creating superuser, you can create test users:
 
 ### Admin User
-- Email: admin@healthcare.com
-- Password: admin123
+- Email: @healthcare.com
+- Password: 
 - Role: admin
 
 ### Doctor User
-- Email: doctor@healthcare.com
-- Password: doctor123
+- Email: @healthcare.com
+- Password: 
 - Role: doctor
 
 ### Patient User
-- Email: patient@healthcare.com
-- Password: patient123
+- Email: healthcare.com
+- Password:
 - Role: patient
 
 ## Troubleshooting
@@ -246,3 +246,4 @@ After running migrations and creating superuser, you can create test users:
 
 ## License
 This project is licensed under the MIT License.#
+
